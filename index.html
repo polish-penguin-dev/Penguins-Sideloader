@@ -66,8 +66,8 @@
 
             try {
             const [p12, mp] = await Promise.all([
-                fetch("/assets/default.p12"),
-                fetch("/assets/default.mobileprovision")
+                fetch("/Penguins-Sideloader/assets/default.p12"),
+                fetch("/Penguins-Sideloader/assets/default.mobileprovision")
             ]);
 
             if (!p12.ok || !mp.ok) {
