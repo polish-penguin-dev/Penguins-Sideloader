@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Penguins' Sideloader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    >
+</head>
+<body>
+    <header class="container">
+        <hgroup>
+            <h1>Penguins' Sideloader</h1>
+            <p>Install Apps From Outside of The Appstore</p>
+        </hgroup>
+    </header>
+
+    <main class="container">
+        <article id="config-profile">
+            <h3>Configuration Profile</h3>
+            <a href="https://wsfteam.xyz/files/configurationprofiles/CFDNS-CP.mobileconfig"><button>Install</button></a>
+
+            <footer>
+                <small>Step 1 (After Installing, Go To General > VPN & Device Management And Accept It)</small>
+            </footer>
+        </article>
+
+        <article id="config-profile">
+            <h3>Sideload App</h3>
+            <input type="file" accept=".ipa" id="file" style="display: none;">
+            <button class="secondary" id="upload">Upload File</button> <a href="itms-services:///?action=download-manifest&url=https://wsfteam.xyz/files/portal/toyota/manifest.plist"><button class="contrast">Download Portal</button></a>
+
+            <footer>
+                <small>Step 2 (Status; <span id="status">Waiting For Upload...</span>)</small>
+            </footer>
+        </article>
+
+        <article id="done">
+            <h3>Done</h3>
+            <p>Accept Certificate In General > VPN & Device Management.<br>Profit.</p>
+
+            <footer>
+                <small>Step 3 (Finish; See <a href="https://wsfteam.xyz/">WSF</a> Which This Is A Wrapper For!)</small>
+            </footer>
+        </article>
+    </main>
+
+    <footer class="container">
+        <small>Thanks For Using Penguins' Sideloader!<br> Made With 💖</small>
+    </footer>
+    <script>
+        const file = document.getElementById("file");
+        const upload = document.getElementById("upload");
+        const status = document.getElementById("status");
+
+        upload.addEventListener("click", () => file.click());
+
+        file.addEventListener("change", async () => {
+            if (!file.files.length) return;
+            const ipaFile = file.files[0];
+
+            status.textContent = "Preparing…";
+
+            try {
+            const [p12, mp] = await Promise.all([
+                fetch("/assets/default.p12"),
+                fetch("/assets/default.mobileprovision")
+            ]);
+
+            if (!p12.ok || !mp.ok) {
+                throw new Error("Failed To Load Default Signing Assets!");
+            }
+
+            const p12b = await p12.blob();
+            const mpb = await mp.blob();
+
+            const fd = new FormData();
+            fd.append("ipa", ipaFile, ipaFile.name);
+            fd.append("p12", p12b, "default.p12");
+            fd.append("mobileprovision", mpb, "default.mobileprovision");
+            fd.append("p12_password", "WSF");
+
+            status.textContent = "Signing…";
+
+            const res = await fetch("https://ipasign-proxy.alexwegrzyn183.workers.dev/sign", {
+                method: "POST",
+                body: fd
+            });
+
+            if (!res.ok) {
+                throw new Error(`Server Error: ${res.status}!`);
+            }
+
+            const data = await res.json();
+
+            if (data.installLink) {
+                status.textContent = "Done! Redirecting…";
+                window.location.href = data.installLink;
+            } else {
+                status.textContent = "Failed; No Install Link!";
+            }
+
+            } catch (err) {
+                console.error(err);
+                status.textContent = "Error: " + err.message;
+            }
+        });
+    </script>
+</body>
+</html>
