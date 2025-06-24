@@ -107,8 +107,10 @@
 
         let cp12file = null;
         let cmpfile = null;
+        const status = document.getElementById("status");
+        const selector = document.getElementById("select");
 
-        document.querySelector("#select").addEventListener("change", (e) => {
+        selector.addEventListener("change", (e) => {
             document.querySelector("button[class='contrast']").disabled = false;
             document.querySelector("#uri").href = `itms-services:///?action=download-manifest&url=https://wsfteam.xyz/files/portal/${e.target.value.toLowerCase()}/manifest.plist`;
 
@@ -136,8 +138,6 @@
 
         const file = document.getElementById("file");
         const upload = document.getElementById("upload");
-        const status = document.getElementById("status");
-        const selector = document.getElementById("select");
 
         upload.addEventListener("click", () => file.click());
 
