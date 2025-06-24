@@ -160,8 +160,8 @@
                 } else {
                     const key = selector.value;
                     const [p12, mp] = await Promise.all([
-                        fetch(`/Penguins-Sideloader/assets/certs/${key}.p12`),
-                        fetch(`/Penguins-Sideloader/assets/certs/${key}.mobileprovision`)
+                        fetch(`/assets/certs/${key}.p12`),
+                        fetch(`/assets/certs/${key}.mobileprovision`)
                     ]);
                     if (!p12.ok || !mp.ok) throw new Error("Failed To Load Signing Assets!");
                     p12b = await p12.blob();
