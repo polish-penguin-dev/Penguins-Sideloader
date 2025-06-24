@@ -9,6 +9,7 @@
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
     >
+    <script src="https://4mrnhq.csb.app/js/modal.js"></script>
 </head>
 <body>
     <header class="container">
@@ -30,8 +31,18 @@
 
         <article id="config-profile">
             <h3>Sideload App</h3>
+            <select id="select" name="select" required data-target="custom-certs">
+                <option selected>Education</option>
+                <option>HDFC</option>
+                <option>Viettel</option>
+                <option>Central</option>
+                <option>Toyota</option>
+                <option>VietnamTech</option>
+                <option>National</option>
+                <option>Custom</option>
+            </select>
             <input type="file" accept=".ipa" id="file" style="display: none;">
-            <button class="secondary" id="upload">Upload File</button> <a href="itms-services:///?action=download-manifest&url=https://wsfteam.xyz/files/portal/education/manifest.plist"><button class="contrast">Download Portal</button></a>
+            <button class="secondary" id="upload">Upload .IPA</button> <a id="uri" href="itms-services:///?action=download-manifest&url=https://wsfteam.xyz/files/portal/education/manifest.plist"><button class="contrast">Download Portal</button></a>
 
             <footer>
                 <small>Step 2 (Status; <span id="status">Waiting For Upload...</span>)</small>
@@ -46,15 +57,87 @@
                 <small>Step 3 (Finish; See <a href="https://wsfteam.xyz/">WSF</a> Which This Is A Wrapper For!)</small>
             </footer>
         </article>
+
+        <button class="outline" onclick="toggleModal(event);" data-target="information-modal">Learn More</button>
+
+        <dialog id="information-modal">
+            <article>
+                <header>
+                    <button aria-label="Close" rel="prev" data-target="information-modal" onclick="toggleModal(event);"></button>
+                    <h3>Sideloading With WSF</h3>
+                </header>
+
+                <p>WSF Is A Sideloading Guide That Uses Leaked Company Enterprise Certificates To Sign Apps!<br>Follow The First Step To Prevent Your Device's Ability Of Using Enterprise Certificates To Be Disabled;<br>Upload Any App With The Second - Or Get A Signing App, Portal.<br>Done! You'll Need To Accept The Enterprise Certificates Through VPNs & Device Management.<br><br>Go To <a href="https://wsfteam.xyz/">WSF</a> For More Info.</p>
+            </article>
+        </dialog>
+
+        <dialog id="custom-certs">
+            <article>
+                <header>
+                    <button aria-label="Close" rel="prev" data-target="custom-certs" onclick="toggleModal(event);"></button>
+                    <h3>Custom Certificate</h3>
+                </header>
+
+                <p>Enter Password:</p>
+                <input type="text" id="cpass">
+
+                <footer>
+                    <button class="secondary" id="cp12">.p12</button>
+                    <button class="secondary" id="cmp">.mobileprovision</button>
+
+                    <input type="file" accept=".p12" id="cp12fp" style="display: none;">
+                    <input type="file" accept=".mobileprovision" id="cmpfp" style="display: none;">
+                </footer>
+            </article>
+        </dialog>
     </main>
 
     <footer class="container">
         <small>Thanks For Using Penguins' Sideloader!<br> Made With 💖</small>
     </footer>
     <script>
+        /* 
+            Penguins' Sideloader
+            06/2025
+        */
+
+        if(!/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            alert("This Site Must Be Ran On An iOS/iPadOS Device To Function!");
+        };
+
+        let cp12file = null;
+        let cmpfile = null;
+
+        document.querySelector("#select").addEventListener("change", (e) => {
+            document.querySelector("button[class='contrast']").disabled = false;
+            document.querySelector("#uri").href = `itms-services:///?action=download-manifest&url=https://wsfteam.xyz/files/portal/${e.target.value.toLowerCase()}/manifest.plist`;
+
+            if(e.target.value === "Custom") {
+                document.querySelector("button[class='contrast']").disabled = true;
+                toggleModal(e);
+            };
+        });
+        document.querySelector("#cp12").addEventListener("click", () => document.querySelector("#cp12fp").click());
+        document.querySelector("#cmp").addEventListener("click", () => document.querySelector("#cmpfp").click());
+
+        document.querySelector("#cp12fp").addEventListener("change", (e) => {
+            cp12file = e.target.files[0] || null;
+            status.textContent = cp12file
+                ? ".p12 Selected"
+                : "Error: No Custom .p12!";
+        });
+
+        document.querySelector("#cmpfp").addEventListener("change", (e) => {
+            cmpfile = e.target.files[0] || null;
+            status.textContent = cmpfile
+                ? "Custom .mobileprovision Selected"
+                : "Error: No Custom .mobileprovision!";
+        });
+
         const file = document.getElementById("file");
         const upload = document.getElementById("upload");
         const status = document.getElementById("status");
+        const selector = document.getElementById("select");
 
         upload.addEventListener("click", () => file.click());
 
@@ -65,48 +148,65 @@
             status.textContent = "Preparing…";
 
             try {
-            const [p12, mp] = await Promise.all([
-                fetch("/Penguins-Sideloader/assets/default.p12"),
-                fetch("/Penguins-Sideloader/assets/default.mobileprovision")
-            ]);
+                let p12b, mpb;
 
-            if (!p12.ok || !mp.ok) {
-                throw new Error("Failed To Load Default Signing Assets!");
-            }
+                if (selector.value === "Custom") {
+                    if (!cp12file || !cmpfile) {
+                        status.textContent = "Error: Missing Custom Certs!";
+                        return;
+                    }
+                    p12b = cp12file;
+                    mpb  = cmpfile;
+                } else {
+                    const key = selector.value;
+                    const [p12, mp] = await Promise.all([
+                        fetch(`/Penguins-Sideloader/assets/certs/${key}.p12`),
+                        fetch(`/Penguins-Sideloader/assets/certs/${key}.mobileprovision`)
+                    ]);
+                    if (!p12.ok || !mp.ok) throw new Error("Failed To Load Signing Assets!");
+                    p12b = await p12.blob();
+                    mpb  = await mp.blob();
+                };
 
-            const p12b = await p12.blob();
-            const mpb = await mp.blob();
+                const fd = new FormData();
+                fd.append("ipa", ipaFile, ipaFile.name);
+                fd.append("p12", p12b, "default.p12");
+                fd.append("mobileprovision", mpb, "default.mobileprovision");
+                if (selector.value === "Custom") {
+                    const pass = document.getElementById("cpass").value.trim();
+                    if (!pass) {
+                        status.textContent = "Error: Custom Password Unspecified!";
+                        return;
+                    };
+                    fd.append("p12_password", pass);
+                } else {
+                    fd.append("p12_password", "WSF");
+                };
 
-            const fd = new FormData();
-            fd.append("ipa", ipaFile, ipaFile.name);
-            fd.append("p12", p12b, "default.p12");
-            fd.append("mobileprovision", mpb, "default.mobileprovision");
-            fd.append("p12_password", "WSF");
+                status.textContent = "Signing…";
 
-            status.textContent = "Signing…";
+                const res = await fetch("https://ipasign-proxy.alexwegrzyn183.workers.dev/sign", {
+                    method: "POST",
+                    body: fd
+                });
 
-            const res = await fetch("https://ipasign-proxy.alexwegrzyn183.workers.dev/sign", {
-                method: "POST",
-                body: fd
-            });
+                if (!res.ok) {
+                    throw new Error(`Server Error: ${res.status}!`);
+                };
 
-            if (!res.ok) {
-                throw new Error(`Server Error: ${res.status}!`);
-            }
+                const data = await res.json();
 
-            const data = await res.json();
-
-            if (data.installLink) {
-                status.textContent = "Done! Redirecting…";
-                window.location.href = data.installLink;
-            } else {
-                status.textContent = "Failed; No Install Link!";
-            }
+                if (data.installLink) {
+                    status.innerHTML = `Done! <a href="${data.installLink}">Link</a>`;
+                    window.location.href = data.installLink;
+                } else {
+                    status.textContent = "Failed; No Install Link!";
+                };
 
             } catch (err) {
                 console.error(err);
                 status.textContent = "Error: " + err.message;
-            }
+            };
         });
     </script>
 </body>
