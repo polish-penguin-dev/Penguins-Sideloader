@@ -128,6 +128,7 @@
         selector.addEventListener("change", (e) => {
             document.querySelector("button[class='contrast']").disabled = false;
             document.querySelector("#uri").href = `itms-services:///?action=download-manifest&url=https://wsfteam.netlify.app/files/manifest/${e.target.value.toLowerCase()}/manifest.plist`;
+            status.textContent = "Waiting For Upload..."; //Default Text
 
             if(e.target.value === "Custom") {
                 document.querySelector("button[class='contrast']").disabled = true; document.querySelector("#uri").href = "#";
