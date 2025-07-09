@@ -14,6 +14,7 @@
     <!-- OG Tags -->
     <meta property="og:title" content="Penguins' Sideloader" />
     <meta property="og:type" content="website" />
+    <meta property="og:description" content="Install Apps From Outside of The Appstore" />
     <meta property="og:url" content="https://sideload.penguins184.xyz/" />
     <meta property="og:image" content="https://sideload.penguins184.xyz/assets/Icon.png" />
     <meta name="theme-color" content="#7289DA" />
@@ -59,7 +60,7 @@
             <button class="secondary" id="upload">Upload .IPA</button> <a id="uri" href="itms-services:///?action=download-manifest&url=https://wsfteam.netlify.app/files/manifest/central/manifest.plist"><button class="contrast">Download Portal</button></a>
 
             <footer>
-                <small>Step 2 (Status; <span id="status">Waiting For Upload...</span>)</small>
+                <small>Step 2 (Status; <i><span id="status">Waiting For Upload...</span></i>)</small>
             </footer>
         </article>
 
@@ -129,7 +130,7 @@
             document.querySelector("#uri").href = `itms-services:///?action=download-manifest&url=https://wsfteam.netlify.app/files/manifest/${e.target.value.toLowerCase()}/manifest.plist`;
 
             if(e.target.value === "Custom") {
-                document.querySelector("button[class='contrast']").disabled = true;
+                document.querySelector("button[class='contrast']").disabled = true; document.querySelector("#uri").href = "#";
 
                 cp12file = null;
                 cmpfile  = null;
