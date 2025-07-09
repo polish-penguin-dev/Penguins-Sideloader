@@ -5,10 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Penguins' Sideloader</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/assets/Icon.png">
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
     >
+
+    <!-- OG Tags -->
+    <meta property="og:title" content="Penguins' Sideloader" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sideload.penguins184.xyz/" />
+    <meta property="og:image" content="https://sideload.penguins184.xyz/assets/Icon.png" />
+    <meta name="theme-color" content="#7289DA" />
+
     <script src="https://4mrnhq.csb.app/js/modal.js"></script>
 </head>
 <body>
@@ -22,7 +31,7 @@
     <main class="container">
         <article id="config-profile">
             <h3>Configuration Profile</h3>
-            <a href="https://wsfteam.xyz/files/configurationprofiles/CFDNS-CP.mobileconfig"><button>Install</button></a>
+            <a href="https://wsfteam.xyz/files/configurationprofiles/WSF-CP.mobileconfig"><button>Install</button></a>
 
             <footer>
                 <small>Step 1 (After Installing, Go To General > VPN & Device Management And Accept It)</small>
@@ -32,17 +41,22 @@
         <article id="config-profile">
             <h3>Sideload App</h3>
             <select id="select" name="select" required data-target="custom-certs">
-                <option selected>Education</option>
+                <option selected>Central</option>
+                <option>Education</option>
+                <option>Eryuan</option>
+                <option>Esensoft</option>
+                <option>Estate</option>
                 <option>HDFC</option>
-                <option>Viettel</option>
-                <option>Central</option>
+                <option>National</option>
+                <option>TCL</option>
                 <option>Toyota</option>
                 <option>VietnamTech</option>
-                <option>National</option>
+                <option>Viettel</option>
+                <option>Wuling</option>
                 <option>Custom</option>
             </select>
             <input type="file" accept=".ipa" id="file" style="display: none;">
-            <button class="secondary" id="upload">Upload .IPA</button> <a id="uri" href="itms-services:///?action=download-manifest&url=https://wsfteam.xyz/files/portal/education/manifest.plist"><button class="contrast">Download Portal</button></a>
+            <button class="secondary" id="upload">Upload .IPA</button> <a id="uri" href="itms-services:///?action=download-manifest&url=https://wsfteam.netlify.app/files/manifest/central/manifest.plist"><button class="contrast">Download Portal</button></a>
 
             <footer>
                 <small>Step 2 (Status; <span id="status">Waiting For Upload...</span>)</small>
@@ -112,7 +126,7 @@
 
         selector.addEventListener("change", (e) => {
             document.querySelector("button[class='contrast']").disabled = false;
-            document.querySelector("#uri").href = `itms-services:///?action=download-manifest&url=https://wsfteam.xyz/files/portal/${e.target.value.toLowerCase()}/manifest.plist`;
+            document.querySelector("#uri").href = `itms-services:///?action=download-manifest&url=https://wsfteam.netlify.app/files/manifest/${e.target.value.toLowerCase()}/manifest.plist`;
 
             if(e.target.value === "Custom") {
                 document.querySelector("button[class='contrast']").disabled = true;
